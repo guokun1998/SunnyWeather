@@ -11,6 +11,7 @@ import kotlin.coroutines.suspendCoroutine
 object SunnyWeatherNetwork {
     private val placeService = ServiceCreator.create<PlaceService>()
     suspend fun searchPlaces(query: String) = placeService.searchPlaces(query).await()
+    // 协程函数，为所有的Call<T>的查询结果函数新增函数.await()
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {
