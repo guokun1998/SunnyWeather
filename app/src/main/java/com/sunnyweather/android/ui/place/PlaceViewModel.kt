@@ -13,11 +13,17 @@ class PlaceViewModel : ViewModel() {
 
     val placeList = ArrayList<Place>()
 
-    // 由于非直接返回数据，无法观察，需要switchMap转换，这样activity可以观测
+    /**
+     * 由于非直接返回数据，无法观察，需要switchMap转换，这样activity可以观测
+     * 监听searchLiveData变化时，调用查询
+     */
     val placeLiveData = Transformations.switchMap(searchLiveData) { query ->
         Repository.searchPlaces(query)
     }
 
+    /**
+     * 变更searchLiveData，变更后placeLiveData会查询并且变更
+     */
     fun searchPlaces(query: String) {
         searchLiveData.value = query
     }

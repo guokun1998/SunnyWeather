@@ -6,6 +6,9 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+/**
+ * 地点请求服务封装
+ */
 interface PlaceService {
     @GET("v2/place?token=${SunnyWeatherApplication.TOKEN}&lang=zh_CN")
     fun searchPlaces(@Query("query") query: String): Call<PlaceResponse>

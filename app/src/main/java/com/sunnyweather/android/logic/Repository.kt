@@ -30,7 +30,11 @@ object Repository {
 //        emit(result)
 //    }
 
-    // 升级版
+    /**
+     * 升级版
+     * 查询地点
+     * Dispatchers.IO表示线程走IO线程，非主线程
+     */
     fun searchPlaces(query: String) = fire(Dispatchers.IO) {
         val placeResponse = SunnyWeatherNetwork.searchPlaces(query)
         if (placeResponse.status == "ok") {
@@ -75,9 +79,14 @@ object Repository {
 //        emit(result)
 //    }
 
-    // 复杂版
+    /**
+     * 升级版
+     * 刷新天气，合并了获取实时天气和每天天气的结果
+     */
     fun refreshWeather(lng: String, lat: String) = fire(Dispatchers.IO) {
         coroutineScope {
+            // 函数使用async 调用await()即可获取执行后的结果
+            // 异步进行了请求
             val deferredRealtime = async {
                 SunnyWeatherNetwork.getRealtimeWeather(lng, lat)
             }
@@ -86,22 +95,25 @@ object Repository {
             }
             val realtimeResponse = deferredRealtime.await()
             val dailyResponse = deferredDaily.await()
+            // 返回结果
             if (realtimeResponse.status == "ok" && dailyResponse.status == "ok") {
-                val weather = Weather(realtimeResponse.result.realtime,
-                    dailyResponse.result.daily)
+                val weather = Weather(realtimeResponse.result.realtime, dailyResponse.result.daily)
                 Result.success(weather)
             } else {
                 Result.failure(
                     RuntimeException(
-                        "realtime response status is ${realtimeResponse.status}" +
-                                "daily response status is ${dailyResponse.status}"
+                        "realtime response status is ${realtimeResponse.status}" + "daily response status is ${dailyResponse.status}"
                     )
                 )
             }
         }
     }
 
-    // suspend关键字，表示所有传入的Lambda表达式中的代码也是拥有挂起函数上下文的
+
+    /**
+     * suspend关键字，表示所有传入的Lambda表达式中的代码也是拥有挂起函数上下文的
+     * 该函数通过使用高阶函数，封装了LiveData，提前进行了try catch，之后再调用就不必try catch了
+     */
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) = liveData<Result<T>>(context) {
         val result = try {
             block()
@@ -111,7 +123,18 @@ object Repository {
         emit(result)
     }
 
+    /**
+     * 接口，保存地点
+     */
     fun savePlace(place: Place) = PlaceDao.savePlace(place)
+
+    /**
+     * 接口，获取已保存的地点
+     */
     fun getSavedPlace() = PlaceDao.getSavedPlace()
+
+    /**
+     * 接口，判断是否已存储
+     */
     fun isPlaceSaved() = PlaceDao.isPlaceSaved()
 }

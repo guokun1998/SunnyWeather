@@ -16,7 +16,9 @@ import com.sunnyweather.android.R
 import com.sunnyweather.android.ui.weather.WeatherActivity
 import kotlinx.android.synthetic.main.fragment_place.*
 
-
+/**
+ * 地点搜索页，初次打开会有，在主页中也有
+ */
 class PlaceFragment : Fragment() {
     val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
 
@@ -28,7 +30,7 @@ class PlaceFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        // 当PlaceFragment被嵌入MainActivity中且存储中有该记录
+        // 当在MainActivity中且存储中有该记录，则直接刷新数据
         if (activity is MainActivity && viewModel.isPlaceSaved()) {
             val place = viewModel.getSavedPlace()
             val intent = Intent(context, WeatherActivity::class.java).apply {
@@ -40,21 +42,26 @@ class PlaceFragment : Fragment() {
             activity?.finish()
             return
         }
+        // 新地点
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
         adapter = PlaceAdapter(this, viewModel.placeList)
         recyclerView.adapter = adapter
+        // 绑定文本变更监听器
         searchPlaceEdit.addTextChangedListener { editable ->
             val content = editable.toString()
             if (content.isNotEmpty()) {
+                // 不为空则查询
                 viewModel.searchPlaces(content)
             } else {
+                // 为空则显示背景图片
                 recyclerView.visibility = View.GONE
                 bgImageView.visibility = View.VISIBLE
                 viewModel.placeList.clear()
                 adapter.notifyDataSetChanged()
             }
         }
+        // 添加数据观察，数据变更时，不显示背景图片
         viewModel.placeLiveData.observe(this, Observer{ result ->
             val places = result.getOrNull()
             if (places != null) {

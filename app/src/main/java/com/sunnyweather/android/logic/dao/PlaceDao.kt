@@ -7,6 +7,9 @@ import com.google.gson.Gson
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.Place
 
+/**
+ * 低电信息的DAO层，负责存取数据，这里使用sharedPreferences存储信息。单例类
+ */
 object PlaceDao {
 
     /**

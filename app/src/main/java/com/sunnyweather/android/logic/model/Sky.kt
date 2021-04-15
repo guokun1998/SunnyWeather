@@ -2,7 +2,12 @@ package com.sunnyweather.android.logic.model
 
 import com.sunnyweather.android.R
 
+/**
+ * 负责转换天气数据到图标和信息
+ */
+
 class Sky (val info: String, val icon: Int, val bg: Int)
+
 private val sky = mapOf(
     "CLEAR_DAY" to Sky("晴", R.drawable.ic_clear_day, R.drawable.bg_clear_day),
     "CLEAR_NIGHT" to Sky("晴", R.drawable.ic_clear_night, R.drawable.bg_clear_night),
@@ -29,6 +34,7 @@ private val sky = mapOf(
     "FOG" to Sky("雾", R.drawable.ic_fog, R.drawable.bg_fog),
     "DUST" to Sky("浮尘", R.drawable.ic_fog, R.drawable.bg_fog)
 )
+
 fun getSky(skycon: String): Sky {
     return sky[skycon] ?: sky["CLEAR_DAY"]!!
 }

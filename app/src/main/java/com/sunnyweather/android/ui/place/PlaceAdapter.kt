@@ -22,18 +22,20 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.place_item, parent, false)
         val holder = ViewHolder(view)
+        // item添加跳转事件
         holder.itemView.setOnClickListener {
             val position = holder.adapterPosition
             val place = placeList[position]
             val activity = fragment.activity
-            //如果是在WeatherActivity中，那么就关闭滑动菜单，给WeatherViewModel赋值新的经纬度坐标和地区名称，然后刷新城市的天气信息
             if (activity is WeatherActivity) {
+                //如果是在WeatherActivity中，那么就关闭滑动菜单，给WeatherViewModel赋值新的经纬度坐标和地区名称，然后刷新城市的天气信息
                 activity.drawerLayout.closeDrawers()
                 activity.viewModel.locationLng = place.location.lng
                 activity.viewModel.locationLat = place.location.lat
                 activity.viewModel.placeName = place.name
                 activity.refreshWeather()
             } else {
+                //不在，则跳转
                 val intent = Intent(parent.context, WeatherActivity::class.java).
                 apply {
                     putExtra("location_lng", place.location.lng)
@@ -43,6 +45,7 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
                 fragment.startActivity(intent)
                 activity?.finish()
             }
+            // 跳转之前保存记录
             fragment.viewModel.savePlace(place)
         }
         return holder

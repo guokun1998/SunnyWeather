@@ -37,6 +37,7 @@ class WeatherActivity : AppCompatActivity() {
             // 打开滑动菜单
             drawerLayout.openDrawer(GravityCompat.START)
         }
+        // 绑定滑动菜单
         drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerStateChanged(newState: Int) {}
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
@@ -59,7 +60,7 @@ class WeatherActivity : AppCompatActivity() {
         if (viewModel.placeName.isEmpty()) {
             viewModel.placeName = intent.getStringExtra("place_name") ?: ""
         }
-        // 开启观察
+        // 开启观察weatherLiveData，变更后展示
         viewModel.weatherLiveData.observe(this, Observer { result ->
             val weather = result.getOrNull()
             if (weather != null) {
@@ -71,6 +72,7 @@ class WeatherActivity : AppCompatActivity() {
             // 得到数据后将刷新条隐藏
             swipeRefresh.isRefreshing = false
         })
+
         // 下拉刷新
         // 下拉刷新进度条颜色
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary)
@@ -82,13 +84,18 @@ class WeatherActivity : AppCompatActivity() {
 
     }
 
+    /**
+     * 刷新天气，调用viewModel刷新并显示下拉进度条
+     */
     fun refreshWeather() {
         viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
         // 显示下拉进度条
         swipeRefresh.isRefreshing = true
     }
 
-
+    /**
+     * 展示天气信息
+     */
     private fun showWeatherInfo(weather: Weather) {
         // 填充数据
         placeName.text = viewModel.placeName
