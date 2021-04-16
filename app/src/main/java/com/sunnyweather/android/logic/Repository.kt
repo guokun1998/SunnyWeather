@@ -3,14 +3,20 @@ package com.sunnyweather.android.logic
 import androidx.lifecycle.liveData
 import com.sunnyweather.android.logic.dao.PlaceDao
 import com.sunnyweather.android.logic.model.Place
+import com.sunnyweather.android.logic.model.PlaceHistory
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.network.SunnyWeatherNetwork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 object Repository {
+
+    // 缓存placeHistoryList
+    private var placeHistoryList = LinkedList<Place>(PlaceDao.getSavedPlaceHistory().placeHistoryList)
+
     // 简单版
     // 仓库返回数据，可以做缓存操作
 //    fun searchPlaces(query: String) = liveData(Dispatchers.IO) {
@@ -124,8 +130,15 @@ object Repository {
     }
 
     /**
-     * 接口，保存地点
+     * 存储地点和地点信息到历史记录
      */
+    fun savePlaceAndPlaceInformation(place: Place) {
+        PlaceDao.savePlace(place)
+        placeHistoryList.remove(place)
+        placeHistoryList.addFirst(place)
+        PlaceDao.savePlaceHistory(PlaceHistory(placeHistoryList))
+    }
+
     fun savePlace(place: Place) = PlaceDao.savePlace(place)
 
     /**
@@ -137,4 +150,15 @@ object Repository {
      * 接口，判断是否已存储
      */
     fun isPlaceSaved() = PlaceDao.isPlaceSaved()
+
+    fun savePlaceHistory(placeHistory: PlaceHistory) = PlaceDao.savePlaceHistory(placeHistory)
+
+    fun getSavedPlaceHistory() : List<Place> {
+        return placeHistoryList
+    }
+
+    fun deletePlaceHistory(place: Place) {
+        placeHistoryList.remove(place)
+        PlaceDao.savePlaceHistory(PlaceHistory(placeHistoryList))
+    }
 }

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.Place
@@ -30,9 +29,9 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
             if (activity is WeatherActivity) {
                 //如果是在WeatherActivity中，那么就关闭滑动菜单，给WeatherViewModel赋值新的经纬度坐标和地区名称，然后刷新城市的天气信息
                 activity.drawerLayout.closeDrawers()
-                activity.viewModel.locationLng = place.location.lng
-                activity.viewModel.locationLat = place.location.lat
-                activity.viewModel.placeName = place.name
+                activity.weatherViewModel.locationLng = place.location.lng
+                activity.weatherViewModel.locationLat = place.location.lat
+                activity.weatherViewModel.placeName = place.name
                 activity.refreshWeather()
             } else {
                 //不在，则跳转
@@ -46,7 +45,8 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
                 activity?.finish()
             }
             // 跳转之前保存记录
-            fragment.viewModel.savePlace(place)
+            fragment.viewModel.savePlaceAndPlaceInformation(place)
+            parent.visibility = View.GONE
         }
         return holder
     }

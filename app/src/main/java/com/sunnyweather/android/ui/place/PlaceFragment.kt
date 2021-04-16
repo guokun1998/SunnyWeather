@@ -2,9 +2,12 @@ package com.sunnyweather.android.ui.place
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -14,7 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.sunnyweather.android.MainActivity
 import com.sunnyweather.android.R
 import com.sunnyweather.android.ui.weather.WeatherActivity
+import kotlinx.android.synthetic.main.forecast.*
 import kotlinx.android.synthetic.main.fragment_place.*
+import kotlinx.android.synthetic.main.place_history_item.*
+import java.util.logging.Logger
 
 /**
  * 地点搜索页，初次打开会有，在主页中也有
@@ -57,16 +63,18 @@ class PlaceFragment : Fragment() {
                 // 为空则显示背景图片
                 recyclerView.visibility = View.GONE
                 bgImageView.visibility = View.VISIBLE
+                placeHistoryListLayout.visibility = View.VISIBLE
                 viewModel.placeList.clear()
                 adapter.notifyDataSetChanged()
             }
         }
         // 添加数据观察，数据变更时，不显示背景图片
-        viewModel.placeLiveData.observe(this, Observer{ result ->
+        viewModel.placeLiveData.observe(viewLifecycleOwner, Observer{ result ->
             val places = result.getOrNull()
             if (places != null) {
                 recyclerView.visibility = View.VISIBLE
                 bgImageView.visibility = View.GONE
+                placeHistoryListLayout.visibility = View.GONE
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)
                 adapter.notifyDataSetChanged()

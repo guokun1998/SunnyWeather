@@ -1,32 +1,31 @@
 package com.sunnyweather.android.ui.weather
 
 import android.content.Context
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.sunnyweather.android.R
-import com.sunnyweather.android.logic.Repository.refreshWeather
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.model.getSky
+import com.sunnyweather.android.ui.place.PlaceViewModel
 import kotlinx.android.synthetic.main.activity_weather.*
 import kotlinx.android.synthetic.main.forecast.*
+import kotlinx.android.synthetic.main.fragment_place.*
 import kotlinx.android.synthetic.main.life_index.*
 import kotlinx.android.synthetic.main.now.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class WeatherActivity : AppCompatActivity() {
-    val viewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
+    val weatherViewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
+    val placeViewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +40,33 @@ class WeatherActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerStateChanged(newState: Int) {}
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-            override fun onDrawerOpened(drawerView: View) {}
+            override fun onDrawerOpened(drawerView: View) {
+                // 展示历史记录
+                searchPlaceEdit.text = null
+                placeHistoryListLayout.removeAllViews()
+                val savedPlaceHistory = placeViewModel.getSavedPlaceHistory()
+                for (place in savedPlaceHistory) {
+                    val view = LayoutInflater.from(this@WeatherActivity).inflate(R.layout.place_history_item, placeHistoryListLayout, false)
+                    val placeHistoryInfo = view.findViewById(R.id.placeHistoryInfo) as TextView
+                    val deletePlaceHistory = view.findViewById(R.id.deletePlaceHistory) as Button
+                    placeHistoryInfo.text = place.name
+                    // 删除按钮事件
+                    deletePlaceHistory.setOnClickListener {
+                        placeViewModel.deletePlaceHistory(place)
+                        placeHistoryListLayout.removeView(view)
+                    }
+                    // 文本绑定跳转
+                    placeHistoryInfo.setOnClickListener {
+                        placeViewModel.savePlace(place)
+                        weatherViewModel.changeLocation(place)
+                        weatherViewModel.refreshWeather(place.location.lng, place.location.lat)
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
+                    placeHistoryListLayout.addView(view)
+                    placeHistoryListLayout.visibility = View.VISIBLE
+                }
+            }
+
             // 当滑动菜单隐藏时
             override fun onDrawerClosed(drawerView: View) {
                 // 隐藏输入法
@@ -51,17 +76,17 @@ class WeatherActivity : AppCompatActivity() {
         })
 
         // 取出数据
-        if (viewModel.locationLng.isEmpty()) {
-            viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
+        if (weatherViewModel.locationLng.isEmpty()) {
+            weatherViewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
         }
-        if (viewModel.locationLat.isEmpty()) {
-            viewModel.locationLat = intent.getStringExtra("location_lat") ?: ""
+        if (weatherViewModel.locationLat.isEmpty()) {
+            weatherViewModel.locationLat = intent.getStringExtra("location_lat") ?: ""
         }
-        if (viewModel.placeName.isEmpty()) {
-            viewModel.placeName = intent.getStringExtra("place_name") ?: ""
+        if (weatherViewModel.placeName.isEmpty()) {
+            weatherViewModel.placeName = intent.getStringExtra("place_name") ?: ""
         }
         // 开启观察weatherLiveData，变更后展示
-        viewModel.weatherLiveData.observe(this, Observer { result ->
+        weatherViewModel.weatherLiveData.observe(this, Observer { result ->
             val weather = result.getOrNull()
             if (weather != null) {
                 showWeatherInfo(weather)
@@ -88,7 +113,7 @@ class WeatherActivity : AppCompatActivity() {
      * 刷新天气，调用viewModel刷新并显示下拉进度条
      */
     fun refreshWeather() {
-        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        weatherViewModel.refreshWeather(weatherViewModel.locationLng, weatherViewModel.locationLat)
         // 显示下拉进度条
         swipeRefresh.isRefreshing = true
     }
@@ -98,7 +123,7 @@ class WeatherActivity : AppCompatActivity() {
      */
     private fun showWeatherInfo(weather: Weather) {
         // 填充数据
-        placeName.text = viewModel.placeName
+        placeName.text = weatherViewModel.placeName
         val realtime = weather.realtime
         val daily = weather.daily
         // 填充now.xml布局中的数据

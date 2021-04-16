@@ -16,3 +16,5 @@ data class Place(val name: String, val location: Location, @SerializedName("form
  * 位置
  */
 data class Location(val lng: String, val lat: String)
+
+data class PlaceHistory(val placeHistoryList: List<Place>)

@@ -1,14 +1,15 @@
 package com.sunnyweather.android.logic.dao
 
 import android.content.Context
-import android.provider.Settings.Global.putString
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.Place
+import com.sunnyweather.android.logic.model.PlaceHistory
+import java.util.*
 
 /**
- * 低电信息的DAO层，负责存取数据，这里使用sharedPreferences存储信息。单例类
+ * 地点信息的DAO层，负责存取数据，这里使用sharedPreferences存储信息。单例类
  */
 object PlaceDao {
 
@@ -21,9 +22,20 @@ object PlaceDao {
         }
     }
 
+    fun savePlaceHistory(placeHistory: PlaceHistory) {
+        sharedPreferences().edit {
+            putString("placeHistory", Gson().toJson(placeHistory))
+        }
+    }
+
     fun getSavedPlace(): Place {
         val placeJson = sharedPreferences().getString("place", "")
         return Gson().fromJson(placeJson, Place::class.java)
+    }
+
+    fun getSavedPlaceHistory(): PlaceHistory {
+        val placeHistoryJson = sharedPreferences().getString("placeHistory", "")
+        return Gson().fromJson(placeHistoryJson, PlaceHistory::class.java) ?: PlaceHistory(LinkedList())
     }
 
     fun isPlaceSaved() = sharedPreferences().contains("place")

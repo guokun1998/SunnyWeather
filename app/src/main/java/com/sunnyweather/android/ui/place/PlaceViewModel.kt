@@ -5,6 +5,7 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.Place
+import kotlin.collections.ArrayList
 
 class PlaceViewModel : ViewModel() {
 
@@ -28,7 +29,21 @@ class PlaceViewModel : ViewModel() {
         searchLiveData.value = query
     }
 
+    fun savePlaceAndPlaceInformation(place: Place) {
+        Repository.savePlaceAndPlaceInformation(place)
+    }
+
     fun savePlace(place: Place) = Repository.savePlace(place)
+
+    fun deletePlaceHistory(place: Place) {
+        Repository.deletePlaceHistory(place)
+    }
+
     fun getSavedPlace() = Repository.getSavedPlace()
+
     fun isPlaceSaved() = Repository.isPlaceSaved()
+
+    fun getSavedPlaceHistory() : List<Place>{
+        return Repository.getSavedPlaceHistory()
+    }
 }

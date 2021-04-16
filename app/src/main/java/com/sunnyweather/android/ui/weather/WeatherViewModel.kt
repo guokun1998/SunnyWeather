@@ -26,4 +26,13 @@ class WeatherViewModel : ViewModel() {
         locationLiveData.value = Location(lng, lat)
     }
 
+    /**
+     * 变更当前主页天气地点
+     */
+    fun changeLocation(place: Place) {
+        placeName = place.name
+        locationLat = place.location.lat
+        locationLng = place.location.lng
+    }
+
 }

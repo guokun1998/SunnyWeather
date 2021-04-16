@@ -26,6 +26,14 @@
             android:hint="输入地址"
             android:background="@drawable/search_bg"/>
     </FrameLayout>
+    <LinearLayout
+        android:id="@+id/placeHistoryListLayout"
+        android:orientation="vertical"
+        android:layout_below="@id/actionBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+    </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
